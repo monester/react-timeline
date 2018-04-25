@@ -3,45 +3,53 @@ import './timeline.css'
 import moment from 'moment';
 
 
-class Line extends React.Component {
+// class Line extends React.Component {
+//   render() {
+//     const style = {
+//       left: this.props.left,
+//       position: 'absolute',
+//       width: 1,
+//       height: 50,
+//       borderLeft: '1px #000 solid',
+//       opacity: '0.2',
+//       marginLeft: '-1px',
+//     };
+//     return <div style={style} />
+//   }
+// }
+
+class DefaultRowCell extends React.Component {
   render() {
-    const style = {
-      left: this.props.left,
-      position: 'absolute',
-      width: 1,
-      height: 50,
-      borderLeft: '1px #000 solid',
-      opacity: '0.2',
-      marginLeft: '-1px',
-    };
-    return <div style={style} />
+    return <div>{this.props.time.format('HH:mm')}</div>
+  }
+}
+
+class DefaultTimeCell extends React.Component {
+  render() {
+    return <div>{this.props.time.format('HH:mm')}</div>
   }
 }
 
 class TimeLineSectionHeaderRow extends React.Component {
   render() {
     const scale = this.props.timeline.scale;  // microseconds per pixel
+    const interval = 30;  // add title every 30 minutes
     const start = this.props.timeline.start;
     const row_count = this.props.timeline.items.length;
+
 
     // round to 15 minutes
     const section_start = moment(start - start % 900000);
 
-    const range = Array.from({length: 20}, (_, i) => i);
-
     // add headers
-    const header_items = range.map(time => [
-      section_start.clone().add({minutes: time * 30}),
-      section_start.clone().add({minutes: time * 30 + 30})
-    ]);
-    // console.log(header_items);
+    const header_items = Array.from({length: 20}, (_, i) =>
+      section_start.clone().add({minutes: i * interval}),
+    );
 
     const header = header_items.map(time => {
-      const left = time[0];
-      const right = time[1];
       const style = {
-        left: ~~((left - start) / scale),
-        width: 1800000 / scale,  // 30 min * 60 sec * 1000 ms
+        left: ~~((time - start) / scale),
+        width: interval * 60000 / scale,  // 30 min * 60 sec * 1000 ms
         height: 25,
         position: 'absolute',
         display: 'block',
@@ -51,8 +59,7 @@ class TimeLineSectionHeaderRow extends React.Component {
         marginBottom: 50 * row_count,
         zIndex: 100,
       };
-      // console.log(style);
-      return <div key={left} style={style}>{left.format('HH:mm')}</div>
+      return <div key={time} style={style}>{time.format('HH:mm')}</div>
     });
 
     return <div className="header">{header}</div>
@@ -62,13 +69,14 @@ class TimeLineSectionHeaderRow extends React.Component {
 
 class TimeLineSectionRow extends React.Component {
   render() {
-    const items = this.props.items;
+    const item_times = this.props.times;
     const scale = this.props.timeline.scale;
     const start = this.props.timeline.start;
-    const elements = items.map((data, index) => {
-      // console.log(data);
-      const left = data[0];
-      const right = data[1];
+    const Cell = this.props.timeline.timecell;
+
+    const elements = item_times.map(data => {
+      const left = data.start_time;
+      const right = data.end_time;
       const style = {
         left: ~~((left - start) / scale),
         width: ~~((right - left) / scale),
@@ -80,7 +88,7 @@ class TimeLineSectionRow extends React.Component {
         backgroundColor: 'red',
         overflow: 'hidden',
       };
-      return <div key={left} style={style}>{left.format('HH:mm')}</div>
+      return <div key={left} style={style}><Cell time={left} data={data}/></div>
     });
     // const lines = _.range(0, 360, 30).map(offset => <Line key={"line"+offset} left={offset*4 + "px"} />);
     return <div className="row">{elements}</div>
@@ -93,7 +101,6 @@ TimeLineSectionRow.defaultProps = {
 
 class TimeLineSection extends React.Component {
   render() {
-    const start = this.props.timeline.start;
     const items = this.props.timeline.items;
 
     // add header for section
@@ -101,7 +108,7 @@ class TimeLineSection extends React.Component {
 
     // add rows with elements
     const rows = items.map(data =>
-      <TimeLineSectionRow key={data.id} timeline={this.props.timeline} items={data.times}/>
+      <TimeLineSectionRow key={data.id} timeline={this.props.timeline} times={data.times}/>
     );
     return <div className='time-line'>
       {header}
@@ -112,8 +119,11 @@ class TimeLineSection extends React.Component {
 
 class FixedColumnSection extends React.Component {
   render() {
-    const rows = this.props.timeline.items.map(item =>
-      <div key={item.title} className='row'>{item.title}</div>
+    const Cell = this.props.timeline.rowcell;
+    const items = this.props.timeline.items;
+
+    const rows = items.map(item =>
+      <div key={item.id} className='row'><Cell data={item}/></div>
     );
     return <div className='fixed'>
       <div className='header' />
@@ -136,6 +146,8 @@ Timeline.defaultProps = {
   start: moment(),
   scale: 15000,
   items: [],
+  rowcell: DefaultRowCell,
+  timecell: DefaultTimeCell,
 };
 
 export { Timeline }
