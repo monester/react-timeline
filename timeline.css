@@ -1,0 +1,36 @@
+.header {
+    height: 25px;
+    position: relative;
+    border-top: 1px #000 solid;
+}
+
+.row {
+    height: 50px;
+    position: relative;
+    border-top: 1px #000 solid;
+}
+
+.row:last-child {
+    border-bottom: 1px #000 solid;
+}
+
+.row:nth-child(even) {
+    background: #CCC
+}
+
+.row:nth-child(odd) {
+    background: #FFF
+}
+
+.fixed {
+    width: 200px;
+    position: absolute;
+    left: 0;
+}
+
+.time-line {
+    position: absolute;
+    left: 200px;
+    overflow: hidden;
+    width: calc(100% - 200px);
+}
