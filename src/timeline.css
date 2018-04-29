@@ -1,34 +1,34 @@
-.header {
+.timelineHeaderRow {
     height: 25px;
     position: relative;
     border-top: 1px #000 solid;
 }
 
-.row {
+.timelineRow {
     height: 50px;
     position: relative;
     border-top: 1px #000 solid;
 }
 
-.row:last-child {
+.timelineRow:last-child {
     border-bottom: 1px #000 solid;
 }
 
-.row:nth-child(even) {
+.timelineRow:nth-child(even) {
     background: #CCC
 }
 
-.row:nth-child(odd) {
+.timelineRow:nth-child(odd) {
     background: #FFF
 }
 
-.fixed {
+.timelineFixedColumn {
     width: 200px;
     position: absolute;
     left: 0;
 }
 
-.time-line {
+.timeline {
     position: absolute;
     left: 200px;
     overflow: hidden;
