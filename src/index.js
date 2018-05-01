@@ -1,6 +1,7 @@
+/* eslint-disable */
 import React from 'react'
-import style from './timeline.css'
-import moment from 'moment';
+import style from './timeline.module.css'
+import moment from 'moment'
 
 
 class DefaultRowCell extends React.Component {
@@ -18,7 +19,7 @@ class DefaultTimeCell extends React.Component {
 class TimeLineSectionHeaderRow extends React.Component {
   render() {
     const scale = this.props.timeline.scale;  // microseconds per pixel
-    const interval = 30;  // add title every 30 minutes
+    const interval = 30;                      // add title every 30 minutes
     const start = this.props.timeline.start;
     const row_count = this.props.timeline.items.length;
 
@@ -31,22 +32,14 @@ class TimeLineSectionHeaderRow extends React.Component {
     );
 
     const header = header_items.map(time => {
-      const style = {
+      const cellStyle = {
         left: ~~((time - start) / scale),
         width: interval * 60000 / scale,  // 30 min * 60 sec * 1000 ms
         height: 25,
-        position: 'absolute',
-        display: 'block',
-        borderLeft: '1px #000 solid',
-        marginLeft: '-1px',
-        backgroundColor: 'red',
-        marginBottom: 50 * row_count,
-        zIndex: 100,
       };
-      return <div key={time} style={style}>{time.format('HH:mm')}</div>
+      return <div key={time} className={style.cell} style={cellStyle}>{time.format('HH:mm')}</div>
     });
-
-    return <div className={style.timelineHeaderRow}>{header}</div>
+    return <div className={style.headerRow}>{header}</div>
   }
 }
 
@@ -61,21 +54,15 @@ class TimeLineSectionRow extends React.Component {
     const elements = item_times.map(data => {
       const time = data.time;
       const duration = data.duration;
-      const style = {
-        left: ~~((time - start) / scale),
-        width: ~~(duration / scale),
+      const cellStyle = {
+        left: data.left,
+        width: data.width,
         height: this.props.height,
-        position: 'absolute',
-        display: 'block',
-        borderLeft: '1px #000 solid',
-        marginLeft: '-1px',
-        backgroundColor: 'red',
-        overflow: 'hidden',
       };
-      return <div key={time} style={style}><Cell data={data}/></div>
+      return <div key={time} className={style.cell} style={cellStyle}><Cell data={data}/></div>
     });
     // const lines = _.range(0, 360, 30).map(offset => <Line key={"line"+offset} left={offset*4 + "px"} />);
-    return <div className={style.timelineRow}>{elements}</div>
+    return <div className={style.row}>{elements}</div>
   }
 }
 
@@ -85,7 +72,9 @@ TimeLineSectionRow.defaultProps = {
 
 class TimeLineSection extends React.Component {
   render() {
-    const items = this.props.timeline.items;
+    const tl = this.props.timeline;
+    const items = precalcSize(tl.start, tl.items, [], tl.scale);
+    const ranges = this.props.timeline.ranges;
 
     // add header for section
     const header = <TimeLineSectionHeaderRow height={25} timeline={this.props.timeline} />;
@@ -94,9 +83,15 @@ class TimeLineSection extends React.Component {
     const rows = items.map(data =>
       <TimeLineSectionRow key={data.id} timeline={this.props.timeline} times={data.times}/>
     );
+
+    // const wraps = ranges.map(item =>
+    //   <div className={style.timeWrap} />
+    // )
+    const wraps = <div className={style.timeWrap} />;
     return <div className={style.timeline}>
       {header}
       {rows}
+      {wraps}
     </div>
   }
 }
@@ -107,21 +102,89 @@ class FixedColumnSection extends React.Component {
     const items = this.props.timeline.items;
 
     const rows = items.map(item =>
-      <div key={item.id} className={style.timelineRow}><Cell data={item}/></div>
+      <div key={item.id} className={style.row}><Cell data={item}/></div>
     );
-    return <div className={style.timelineFixedColumn}>
-      <div className={style.timelineHeaderRow} />
+    return <div className={style.fixedColumn}>
+      <div className={style.headerRow} />
       {rows}
     </div>
   }
 }
 
+// class DataSource {
+//   constructor(start, items, collapse=[]) {
+//     this.collapse = collapse;
+//     this.items = [];
+//     items.map(item => {
+//       this.items.push()
+//     })
+//   }
+
+//   generateItems(items) {
+//     this.items = [];
+// //    for
+
+//   }
+
+//   static calcOffset() {
+
+//   }
+
+//   rows() {
+
+//   }
+// }
+
+function precalcSize(start, items, collapse, scale) {
+  for(let item of items) {
+    for(let cell of item.times) {
+      cell.left = ~~((cell.time - start) / scale);
+      cell.width = ~~(cell.duration / scale);
+    }
+  }
+  console.log(items);
+  return items;
+}
 
 class Timeline extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  getRanges = () => {
+    const items = this.props.items;
+    const roundTo = this.props.roundTo;
+    let allTimes = [];
+    for(const i of items) allTimes = allTimes.concat(i.times.map(e => {
+      const startTime = e.time - e.time % roundTo;
+      let endTime = e.time + e.duration;
+      endTime = endTime - endTime % roundTo + roundTo;
+      return {start: e.time - e.time % roundTo, end: endTime}
+    }));
+    allTimes.sort((a,b) => a.start-b.start);
+    let ranges = [];
+    for(const higher of allTimes) {
+      if(ranges.length === 0) { ranges.push(higher); }
+      else {
+        const lower = ranges[ranges.length - 1];
+        if(higher.start <= lower.end) {
+          const upper_bound = Math.max(lower.end, higher.end);
+          ranges[ranges.length - 1] = {start: lower.start, end: upper_bound}
+        } else {
+          ranges.push(higher);
+        }
+      }
+    }
+    // console.log(allTimes);
+    // console.log(ranges.map(x => `${new Date(x.start)}-${new Date(x.end)}`).join(','));
+    return ranges
+  };
+
   render() {
-    return <div>
+    const ranges = this.getRanges();
+    return <div style={{height: 27 + 51*this.props.items.length}}>
       <FixedColumnSection timeline={this.props} />
-      <TimeLineSection timeline={this.props} />
+      <TimeLineSection timeline={this.props} ranges={ranges} />
     </div>
   }
 }
@@ -129,6 +192,7 @@ class Timeline extends React.Component {
 Timeline.defaultProps = {
   start: moment(),
   scale: 15000,
+  roundTo: 30 * 60 * 1000, // 30 minutes in ms
   items: [],
   rowcell: DefaultRowCell,
   timecell: DefaultTimeCell,

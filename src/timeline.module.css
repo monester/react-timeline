@@ -1,0 +1,56 @@
+.timeWrap {
+  background: linear-gradient(-45deg, white, white 25%, #F0F5FF 25%, #F0F5FF 50%, white 50%, white 75%, #F0F5FF 75%, #F0F5FF);
+  background-size: 72px 72px;
+  background-repeat: repeat;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50px;
+  height: 400px;
+}
+
+.cell {
+    position: absolute;
+    display: block;
+    border-left: 1px #000 solid;
+    margin-left: -1px;
+    background-color: red;
+    overflow: hidden;
+}
+
+.row {
+    height: 50px;
+    position: relative;
+    border-top: 1px #000 solid;
+}
+
+.headerRow {
+    composes: row;
+    height: 25px;
+}
+
+.row:last-child {
+    border-bottom: 1px #000 solid;
+}
+
+.row:nth-child(even) {
+    background: #CCC
+}
+
+.row:nth-child(odd) {
+    background: #FFF
+}
+
+.fixedColumn {
+    width: 200px;
+    position: absolute;
+    left: 0;
+}
+
+.timeline {
+    position: absolute;
+    left: 200px;
+    overflow: hidden;
+    width: calc(100% - 200px);
+    border-bottom: 1px #000 solid;
+}
