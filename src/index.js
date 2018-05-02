@@ -19,25 +19,27 @@ class DefaultTimeCell extends React.Component {
 class TimeLineSectionHeaderRow extends React.Component {
   render() {
     const scale = this.props.timeline.scale;  // microseconds per pixel
-    const interval = 30;                      // add title every 30 minutes
+    const interval = 15 * 60 * 1000;          // add title every 15 minutes
     const start = this.props.timeline.start;
-    const row_count = this.props.timeline.items.length;
 
     // round to 15 minutes
-    const section_start = moment(start - start % 900000);
+    const section_start = start - start % 900000;
 
     // add headers
-    const header_items = Array.from({length: 20}, (_, i) =>
-      section_start.clone().add({minutes: i * interval}),
-    );
+    const header_items = Array.from({length: 30}, (_, i) =>{
+      return {time: start + interval * i, duration: interval}
+    });
+    console.log('>> start')
+    precalcSizeGen(start, header_items, this.props.collapse, scale);
+    console.log('>> end')
 
-    const header = header_items.map(time => {
+    const header = header_items.filter(time => time.width > 0).map(time => {
       const cellStyle = {
-        left: ~~((time - start) / scale),
-        width: interval * 60000 / scale,  // 30 min * 60 sec * 1000 ms
+        left: time.left,
+        width: time.width,  // 30 min * 60 sec * 1000 ms
         height: 25,
       };
-      return <div key={time} className={style.cell} style={cellStyle}>{time.format('HH:mm')}</div>
+      return <div key={time.left} className={style.headerCell} style={cellStyle}>{moment(time.time).format('HH:mm')}</div>
     });
     return <div className={style.headerRow}>{header}</div>
   }
@@ -73,22 +75,24 @@ TimeLineSectionRow.defaultProps = {
 class TimeLineSection extends React.Component {
   render() {
     const tl = this.props.timeline;
-    const items = precalcSize(tl.start, tl.items, [], tl.scale);
-    const ranges = this.props.timeline.ranges;
+    const items = precalcSize(tl.start, tl.items, this.props.ranges, tl.scale);
+    // const ranges = precalcSize(tl.start, [{times: this.props.ranges}], [], tl.scale)[0].times;
+    const ranges = this.props.ranges;
+
 
     // add header for section
-    const header = <TimeLineSectionHeaderRow height={25} timeline={this.props.timeline} />;
+    const header = <TimeLineSectionHeaderRow height={25} timeline={this.props.timeline} collapse={ranges} />;
 
     // add rows with elements
     const rows = items.map(data =>
       <TimeLineSectionRow key={data.id} timeline={this.props.timeline} times={data.times}/>
     );
 
-    // const wraps = ranges.map(item =>
-    //   <div className={style.timeWrap} />
-    // )
-    const wraps = <div className={style.timeWrap} />;
-    return <div className={style.timeline}>
+    const wraps = ranges.map(item =>
+      <div key={item.left} className={style.timeWrap} style={{left: item.left, width: item.collapseWidth}} />
+    )
+    // const wraps = <div className={style.timeWrap} />;
+    return <div className={style.timeline} style={{backgroundSize: ~~(15*60*1000/tl.scale)}}>
       {header}
       {rows}
       {wraps}
@@ -111,57 +115,58 @@ class FixedColumnSection extends React.Component {
   }
 }
 
-// class DataSource {
-//   constructor(start, items, collapse=[]) {
-//     this.collapse = collapse;
-//     this.items = [];
-//     items.map(item => {
-//       this.items.push()
-//     })
-//   }
+function precalcSizeGen(start, items, collapse, scale) {
+  let collapseIndex = 0;  // not active yet
+  let collapsedTime = 0;
+  let collapsedWidth = 0;
+  let startTime = start;
+  let endTime = (collapse.length > 0)?collapse[0].time:Infinity;
+  for(let cell of items) {
+    if(cell.time >= endTime && collapseIndex < collapse.length) {
+      // console.log(collapse[collapseIndex].time + collapse[collapseIndex].duration)
+      startTime = collapse[collapseIndex].time + collapse[collapseIndex].duration;
+      collapsedTime += collapse[collapseIndex].duration;
+      collapsedWidth += 20;
+      collapseIndex += 1;
+      endTime = (collapse.length > collapseIndex)?collapse[collapseIndex].time:Infinity;
+    }
 
-//   generateItems(items) {
-//     this.items = [];
-// //    for
-
-//   }
-
-//   static calcOffset() {
-
-//   }
-
-//   rows() {
-
-//   }
-// }
-
-function precalcSize(start, items, collapse, scale) {
-  for(let item of items) {
-    for(let cell of item.times) {
-      cell.left = ~~((cell.time - start) / scale);
+    // console.log(new Date(cell.time), new Date(startTime));
+    console.log(`collapsedWidth: ${collapsedWidth}`);
+    if(cell.time < startTime) {
+      cell.left = 0;
+      cell.width = 0;
+    } else {
+      cell.left = ~~((cell.time - start - collapsedTime) / scale) + collapsedWidth;
       cell.width = ~~(cell.duration / scale);
     }
   }
-  console.log(items);
+  return items
+}
+
+
+function precalcSize(start, items, collapse, scale) {
+  const allCells = []
+  for(let item of items) {
+    for(let cell of item.times) {
+      allCells.push(cell);
+    }
+  }
+  allCells.sort((a, b) => a.start - b.start);
+  precalcSizeGen(start, allCells, collapse, scale);
   return items;
 }
 
-class Timeline extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+function calcCollapse(start, items, scale) {
+    // flatten all times from all rows
+    const allTimes = items.map(item =>
+      item.times.map(e => {
+        return {start: e.time, end: e.time + e.duration}
+      })
+    ).reduce((acc, value) => acc.concat(value), []);
+    allTimes.sort((a, b) => a.start - b.start);
 
-  getRanges = () => {
-    const items = this.props.items;
-    const roundTo = this.props.roundTo;
-    let allTimes = [];
-    for(const i of items) allTimes = allTimes.concat(i.times.map(e => {
-      const startTime = e.time - e.time % roundTo;
-      let endTime = e.time + e.duration;
-      endTime = endTime - endTime % roundTo + roundTo;
-      return {start: e.time - e.time % roundTo, end: endTime}
-    }));
-    allTimes.sort((a,b) => a.start-b.start);
+    // finding time ranges
     let ranges = [];
     for(const higher of allTimes) {
       if(ranges.length === 0) { ranges.push(higher); }
@@ -175,14 +180,35 @@ class Timeline extends React.Component {
         }
       }
     }
-    // console.log(allTimes);
-    // console.log(ranges.map(x => `${new Date(x.start)}-${new Date(x.end)}`).join(','));
-    return ranges
-  };
 
+    // inverting ranges to free time
+    let collapsedTime = 0;
+    let collapsedWidth = 0;
+    const free = ranges.slice(1).map((_, index) => {
+      const left = ~~((ranges[index].end - start - collapsedTime) / scale) + collapsedWidth;
+      const collapseTime = ranges[index+1].start - ranges[index].end;
+      collapsedWidth += 20;
+      collapsedTime += collapseTime;
+      return {
+        time: ranges[index].end,
+        left: left,
+        duration: collapseTime,
+        collapseWidth: 20,
+      }
+    });
+    return free
+}
+
+class Timeline extends React.Component {
   render() {
-    const ranges = this.getRanges();
-    return <div style={{height: 27 + 51*this.props.items.length}}>
+    console.log("RENDER")
+    console.log(this.props.start)
+    if (this.props.items.length > 0)
+      console.log(this.props.items[0].times[0].time);
+    console.log("RENDER STOP")
+
+    const ranges = calcCollapse(this.props.start, this.props.items, this.props.scale);
+    return <div style={{height: 27 + 51 * this.props.items.length}}>
       <FixedColumnSection timeline={this.props} />
       <TimeLineSection timeline={this.props} ranges={ranges} />
     </div>

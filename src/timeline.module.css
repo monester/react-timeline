@@ -1,6 +1,6 @@
 .timeWrap {
-  background: linear-gradient(-45deg, white, white 25%, #F0F5FF 25%, #F0F5FF 50%, white 50%, white 75%, #F0F5FF 75%, #F0F5FF);
-  background-size: 72px 72px;
+  background: linear-gradient(45deg, white, white 25%, #F0F5FF 25%, #F0F5FF 50%, white 50%, white 75%, #F0F5FF 75%, #F0F5FF);
+  background-size: 16px 16px;
   background-repeat: repeat;
   position: absolute;
   left: 0;
@@ -8,14 +8,13 @@
   width: 50px;
   height: 400px;
 }
-
 .cell {
     position: absolute;
     display: block;
     border-left: 1px #000 solid;
-    margin-left: -1px;
-    background-color: red;
+    margin-left: 0;
     overflow: hidden;
+    background-color: red;
 }
 
 .row {
@@ -24,8 +23,18 @@
     border-top: 1px #000 solid;
 }
 
+.headerCell {
+    position: absolute;
+    display: block;
+    border-left: 1px #000 solid;
+    margin-left: 0;
+    overflow: hidden;
+    height: 25px;
+}
+
 .headerRow {
-    composes: row;
+    position: relative;
+    border-top: 1px #000 solid;
     height: 25px;
 }
 
@@ -34,11 +43,11 @@
 }
 
 .row:nth-child(even) {
-    background: #CCC
+    background: rgba(204, 204,204, 0.8);
 }
 
 .row:nth-child(odd) {
-    background: #FFF
+    background: rgba(255, 255, 255, 0.8);
 }
 
 .fixedColumn {
@@ -53,4 +62,6 @@
     overflow: hidden;
     width: calc(100% - 200px);
     border-bottom: 1px #000 solid;
+    /*background: linear-gradient(90deg, black, black 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0));*/
+    /*background-position: 10px;*/
 }

@@ -29,7 +29,7 @@ class TimeCell extends React.Component {
     if (this.props.data.clan_b) {
       title = `${title} vs ${this.props.data.clan_b.tag}`
     }
-    return <div>{title}</div>
+    return <div>{moment(this.props.data.time).format('HH:mm')} {title}</div>
   }
 }
 
@@ -73,10 +73,13 @@ export default class App extends Component {
       }, {
         province_name: 'yy', id: 'yy',
         times: [{
-          time: moment(Math.ceil(moment() / min30) * min30 + min30*4),
+          time: moment(Math.ceil(moment() / min30) * min30 + min30*8),
           duration: min30, clan_a: null, clan_b: null,
         }, {
-          time: moment(Math.ceil(moment() / min30) * min30 + min30*5),
+          time: moment(Math.ceil(moment() / min30) * min30 + min30*9),
+          duration: min30, clan_a: null, clan_b: null,
+        }, {
+          time: moment(Math.ceil(moment() / min30) * min30 + min30*12),
           duration: min30, clan_a: null, clan_b: null,
         }]
       }]
@@ -84,9 +87,11 @@ export default class App extends Component {
   }
 
   render () {
+    const min30 = 30*60*1000;
     return (
       <div>
         <Timeline
+          start={moment(Math.ceil(moment() / min30) * min30)}
           rowcell={RowCell}
           timecell={TimeCell}
           items={this.state.items}
