@@ -29,7 +29,7 @@ class TimeCell extends React.Component {
     if (this.props.data.clan_b) {
       title = `${title} vs ${this.props.data.clan_b.tag}`
     }
-    return <div>{moment(this.props.data.time).format('HH:mm')} {title}</div>
+    return <div>{moment(this.props.data.time).format('HH:mm')} - {moment(this.props.data.time+this.props.data.duration).format('HH:mm')} {title}</div>
   }
 }
 
@@ -60,36 +60,61 @@ export default class App extends Component {
       app.setState({items: response.provinces});
     }); */
     const min30 = 30*60*1000;
-    app.setState({
-      items: [{
-        province_name: 'xx', id: 'xx',
-        times: [{
-          time: moment(Math.ceil(moment() / min30) * min30),
-          duration: min30, clan_a: null, clan_b: null,
-        }, {
-          time: moment(Math.ceil(moment() / min30) * min30 + min30),
-          duration: min30, clan_a: null, clan_b: null,
-        }]
-      }, {
-        province_name: 'yy', id: 'yy',
-        times: [{
-          time: moment(Math.ceil(moment() / min30) * min30 + min30*8),
-          duration: min30, clan_a: null, clan_b: null,
-        }, {
-          time: moment(Math.ceil(moment() / min30) * min30 + min30*9),
-          duration: min30, clan_a: null, clan_b: null,
-        }, {
-          time: moment(Math.ceil(moment() / min30) * min30 + min30*12),
-          duration: min30, clan_a: null, clan_b: null,
-        }]
+    const data = [{
+      province_name: 'xx', id: 'xx',
+      times: [{
+        time: moment(Math.ceil(moment() / min30) * min30 + min30),
+        duration: min30/2, clan_a: null, clan_b: null,
+      }, /*{
+        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 2),
+        duration: min30/2, clan_a: null, clan_b: null,
+      },*/ {
+        time: moment(Math.ceil(moment() / min30) * min30 + min30*3),
+        duration: min30, clan_a: null, clan_b: null,
       }]
-    })
+    }, {
+      province_name: 'yy', id: 'yy',
+      times: [{
+        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8 - min30 * 0.1),
+        duration: min30 / 2, clan_a: null, clan_b: null,
+      }, {
+        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8.5),
+        duration: min30 / 2, clan_a: null, clan_b: null,
+      }, {
+        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 9),
+        duration: min30, clan_a: null, clan_b: null,
+      }, {
+        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 12),
+        duration: min30, clan_a: null, clan_b: null,
+      }]
+    }, {
+      province_name: 'fort', id: 'fort',
+      times: [{
+        time: moment(Math.ceil(moment() / min30) * min30 + min30*8),
+        duration: min30/2, clan_a: null, clan_b: null,
+      }, {
+        time: moment(Math.ceil(moment() / min30) * min30 + min30*8.5),
+        duration: min30/2, clan_a: null, clan_b: null,
+      }, {
+        time: moment(Math.ceil(moment() / min30) * min30 + min30*9),
+        duration: min30, clan_a: null, clan_b: null,
+      }, {
+        time: moment(Math.ceil(moment() / min30) * min30 + min30*48),
+        duration: min30, clan_a: null, clan_b: null,
+      }]
+    }];
+    // console.log(JSON.stringify(data, null, '  '));
+    // console.log(data);
+    app.setState({items: data})
   }
 
   render () {
     const min30 = 30*60*1000;
     return (
       <div>
+        <p>TEST</p>
+
+        <div style={{width: 1400, margin: 20}}>
         <Timeline
           start={moment(Math.ceil(moment() / min30) * min30)}
           rowcell={RowCell}
@@ -97,6 +122,6 @@ export default class App extends Component {
           items={this.state.items}
         />
       </div>
-    )
+    </div>)
   }
 }

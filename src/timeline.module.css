@@ -1,17 +1,25 @@
 .timeWrap {
-  background: linear-gradient(45deg, white, white 25%, #F0F5FF 25%, #F0F5FF 50%, white 50%, white 75%, #F0F5FF 75%, #F0F5FF);
+  background: linear-gradient(45deg, white, white 25%, #F0F5FF 25%, #F0F5FF 50%, white 50%, white 75%, #F0F5FF 75%, #F0F5FF) repeat;
+  /*background-color: red;*/
   background-size: 16px 16px;
-  background-repeat: repeat;
   position: absolute;
   left: 0;
-  top: 0;
-  width: 50px;
-  height: 400px;
+  top: 26px;
 }
+
+.timeWrap div {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 9pt;
+  color: darkgrey;
+  transform: rotate(-90deg);
+  text-align: center;
+}
+
 .cell {
     position: absolute;
     display: block;
     border-left: 1px #000 solid;
+    border-right: 1px #000 solid;
     margin-left: 0;
     overflow: hidden;
     background-color: red;
@@ -27,15 +35,17 @@
     position: absolute;
     display: block;
     border-left: 1px #000 solid;
+    border-right: 1px #000 solid;
     margin-left: 0;
     overflow: hidden;
+    top: 25px;
     height: 25px;
 }
 
 .headerRow {
     position: relative;
     border-top: 1px #000 solid;
-    height: 25px;
+    height: 50px;
 }
 
 .row:last-child {

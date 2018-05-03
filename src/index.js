@@ -1,47 +1,45 @@
 /* eslint-disable */
 import React from 'react'
 import style from './timeline.module.css'
+import FixedColumnSection from './fixed-column'
+import {DefaultTimeCell, DefaultRowCell} from './content'
 import moment from 'moment'
-
-
-class DefaultRowCell extends React.Component {
-  render() {
-    return <div>{this.props.data.title}</div>
-  }
-}
-
-class DefaultTimeCell extends React.Component {
-  render() {
-    return <div>{this.props.data.time.format('HH:mm')}</div>
-  }
-}
 
 class TimeLineSectionHeaderRow extends React.Component {
   render() {
-    const scale = this.props.timeline.scale;  // microseconds per pixel
-    const interval = 15 * 60 * 1000;          // add title every 15 minutes
     const start = this.props.timeline.start;
+    const items = this.props.timeline.items;
+    const collapse = this.props.collapse;
+    const scale = this.props.timeline.scale;  // microseconds per pixel
 
-    // round to 15 minutes
-    const section_start = start - start % 900000;
+    const interval = 15 * 60 * 1000;          // add title every 15 minutes
 
     // add headers
-    const header_items = Array.from({length: 30}, (_, i) =>{
+    const header_items = [...Array(60).keys()].map(i =>{
       return {time: start + interval * i, duration: interval}
     });
-    console.log('>> start')
-    precalcSizeGen(start, header_items, this.props.collapse, scale);
-    console.log('>> end')
+    precalcSizeGen(start, header_items, collapse, scale);
 
+    const headerGroup = [{title: 'today', time: moment() / 86400000, duration: 86400*1000}];
+    const h2 = headerGroup.map(item => {
+      const cellStyle = {
+        left: 0,
+        width: 1000,
+        height: 24,
+        borderBottom: '1px #000 solid',
+        top: 0,
+      };
+      return <div key={item.title} className={style.headerCell} style={cellStyle}>{item.title}</div>
+    });
     const header = header_items.filter(time => time.width > 0).map(time => {
       const cellStyle = {
         left: time.left,
-        width: time.width,  // 30 min * 60 sec * 1000 ms
+        width: time.width - 1,  // 30 min * 60 sec * 1000 ms
         height: 25,
       };
       return <div key={time.left} className={style.headerCell} style={cellStyle}>{moment(time.time).format('HH:mm')}</div>
     });
-    return <div className={style.headerRow}>{header}</div>
+    return <div className={style.headerRow}>{h2}{header}</div>
   }
 }
 
@@ -49,21 +47,16 @@ class TimeLineSectionHeaderRow extends React.Component {
 class TimeLineSectionRow extends React.Component {
   render() {
     const item_times = this.props.times;
-    const scale = this.props.timeline.scale;
-    const start = this.props.timeline.start;
     const Cell = this.props.timeline.timecell;
-
     const elements = item_times.map(data => {
       const time = data.time;
-      const duration = data.duration;
       const cellStyle = {
         left: data.left,
-        width: data.width,
+        width: data.width - 1,
         height: this.props.height,
       };
       return <div key={time} className={style.cell} style={cellStyle}><Cell data={data}/></div>
     });
-    // const lines = _.range(0, 360, 30).map(offset => <Line key={"line"+offset} left={offset*4 + "px"} />);
     return <div className={style.row}>{elements}</div>
   }
 }
@@ -74,25 +67,30 @@ TimeLineSectionRow.defaultProps = {
 
 class TimeLineSection extends React.Component {
   render() {
-    const tl = this.props.timeline;
-    const items = precalcSize(tl.start, tl.items, this.props.ranges, tl.scale);
-    // const ranges = precalcSize(tl.start, [{times: this.props.ranges}], [], tl.scale)[0].times;
-    const ranges = this.props.ranges;
-
+    const start = this.props.timeline.start;
+    const items = this.props.timeline.items;
+    const collapse = this.props.collapse;
+    const scale = this.props.timeline.scale;
 
     // add header for section
-    const header = <TimeLineSectionHeaderRow height={25} timeline={this.props.timeline} collapse={ranges} />;
+    const header = <TimeLineSectionHeaderRow height={25} timeline={this.props.timeline} collapse={collapse} />;
 
     // add rows with elements
-    const rows = items.map(data =>
-      <TimeLineSectionRow key={data.id} timeline={this.props.timeline} times={data.times}/>
-    );
+    const rows = items.map(data => {
+      const times = precalcSizeGen(start, data.times, collapse, scale);
+      return <TimeLineSectionRow key={data.id} timeline={this.props.timeline} times={times}/>
+    });
 
-    const wraps = ranges.map(item =>
-      <div key={item.left} className={style.timeWrap} style={{left: item.left, width: item.collapseWidth}} />
-    )
-    // const wraps = <div className={style.timeWrap} />;
-    return <div className={style.timeline} style={{backgroundSize: ~~(15*60*1000/tl.scale)}}>
+    const wraps = collapse.map(item => {
+      const height = items.length * 50 + 25 + 3;
+      const width = item.collapseWidth;
+
+      return <div key={item.left} className={style.timeWrap}
+           style={{left: item.left + 1, width: width - 1, height: height}}>
+        <div style={{height: height, width: height}}>{moment(item.time).format('HH:mm')} - {moment(item.time + item.duration).format('HH:mm')}</div>
+      </div>
+    });
+    return <div className={style.timeline} style={{backgroundSize: ~~(15*60*1000/scale)}}>
       {header}
       {rows}
       {wraps}
@@ -100,124 +98,153 @@ class TimeLineSection extends React.Component {
   }
 }
 
-class FixedColumnSection extends React.Component {
-  render() {
-    const Cell = this.props.timeline.rowcell;
-    const items = this.props.timeline.items;
-
-    const rows = items.map(item =>
-      <div key={item.id} className={style.row}><Cell data={item}/></div>
-    );
-    return <div className={style.fixedColumn}>
-      <div className={style.headerRow} />
-      {rows}
-    </div>
+Array.prototype.findReverse = (cb) => {
+  for(let i=this.length; i>0; i--) {
+    if(cb(this[i])) return this[i];
   }
-}
+};
 
 function precalcSizeGen(start, items, collapse, scale) {
-  let collapseIndex = 0;  // not active yet
-  let collapsedTime = 0;
-  let collapsedWidth = 0;
+  let collapseIndex = 0;
+  // let collapsedTime = 0;
+  // let collapsedWidth = 0;
   let startTime = start;
   let endTime = (collapse.length > 0)?collapse[0].time:Infinity;
   for(let cell of items) {
-    if(cell.time >= endTime && collapseIndex < collapse.length) {
-      // console.log(collapse[collapseIndex].time + collapse[collapseIndex].duration)
+    while(cell.time >= endTime && collapseIndex < collapse.length) {
       startTime = collapse[collapseIndex].time + collapse[collapseIndex].duration;
-      collapsedTime += collapse[collapseIndex].duration;
-      collapsedWidth += 20;
+      // collapsedTime += collapse[collapseIndex].duration;
+      // collapsedWidth += 20;
       collapseIndex += 1;
       endTime = (collapse.length > collapseIndex)?collapse[collapseIndex].time:Infinity;
     }
 
-    // console.log(new Date(cell.time), new Date(startTime));
-    console.log(`collapsedWidth: ${collapsedWidth}`);
     if(cell.time < startTime) {
       cell.left = 0;
       cell.width = 0;
     } else {
-      cell.left = ~~((cell.time - start - collapsedTime) / scale) + collapsedWidth;
-      cell.width = ~~(cell.duration / scale);
+      const func = item => cell.time > item.time;
+      const startCollapsedTimes = collapse.filter(func).map(i => i.duration);
+      const startCollapsedTime = startCollapsedTimes.reduce((acc, cv) => acc + cv, 0);
+      const startCollapsedWidth = startCollapsedTimes.length * 20;
+
+      const endCollapsedTimes = collapse.filter(item => cell.time + cell.duration > item.time).map(i => i.duration);
+      const endCollapsedTime = endCollapsedTimes.reduce((acc, cv) => acc + cv, 0);
+      const endCollapsedWidth = endCollapsedTimes.length * 20;
+
+
+      // const end = collapse.find(func) || Infinity; //.map(i => i.duration)
+      const end = collapse.findReverse(item => cell.time + cell.duration <= item.time) || Infinity;
+      const endTime = (end === Infinity)?Infinity:end.time;
+
+      cell.left = ~~((cell.time - start - startCollapsedTime) / scale) + startCollapsedWidth;
+      if (cell.time + cell.duration <= endTime) {
+        cell.width = ~~((cell.duration - (endCollapsedTime - startCollapsedTime)) / scale) + (endCollapsedWidth - startCollapsedWidth);
+      } else {
+        cell.width = ~~((endTime - cell.time) / scale);
+      }
     }
   }
   return items
 }
 
+function calcCollapse(start, items, scale) {
+  const day = 86400000;
+  const hrs8 = day / 3;
+  const topItems = [
+    {
+      title: 'first',
+      time: moment(~~(moment() / day) * day),
+      duration: hrs8,
+    }, {
+      title: 'first',
+      time: moment(~~(moment() / day) * day) + hrs8,
+      duration: hrs8,
+    }, {
+      title: 'first',
+      time: moment(~~(moment() / day) * day) + hrs8 * 2,
+      duration: hrs8,
+    }, {
+      title: 'first',
+      time: moment(~~(moment() / day) * day) + hrs8 * 3,
+      duration: hrs8,
+    }, {
+      title: 'first',
+      time: moment(~~(moment() / day) * day) + hrs8 * 4,
+      duration: hrs8,
+    }
+  ];
 
-function precalcSize(start, items, collapse, scale) {
-  const allCells = []
-  for(let item of items) {
-    for(let cell of item.times) {
-      allCells.push(cell);
+  // flatten all times from all items
+  const times = items.map(item =>
+    item.times.map(e => {
+      return {start: e.time, end: e.time + e.duration}
+    })
+  ).reduce((acc, value) => acc.concat(value), []);
+  times.sort((left, right) => left.time - right.time);
+
+  // finding time ranges
+  let ranges = [];
+  for(const higher of times) {
+    if(ranges.length === 0) { ranges.push(higher); }
+    else {
+      const lower = ranges[ranges.length - 1];
+      if(higher.start <= lower.end) {
+        const upper_bound = Math.max(lower.end, higher.end);
+        ranges[ranges.length - 1] = {start: lower.start, end: upper_bound}
+      } else {
+        ranges.push(higher);
+      }
     }
   }
-  allCells.sort((a, b) => a.start - b.start);
-  precalcSizeGen(start, allCells, collapse, scale);
-  return items;
-}
 
-function calcCollapse(start, items, scale) {
-    // flatten all times from all rows
-    const allTimes = items.map(item =>
-      item.times.map(e => {
-        return {start: e.time, end: e.time + e.duration}
-      })
-    ).reduce((acc, value) => acc.concat(value), []);
-    allTimes.sort((a, b) => a.start - b.start);
-
-    // finding time ranges
-    let ranges = [];
-    for(const higher of allTimes) {
-      if(ranges.length === 0) { ranges.push(higher); }
-      else {
-        const lower = ranges[ranges.length - 1];
-        if(higher.start <= lower.end) {
-          const upper_bound = Math.max(lower.end, higher.end);
-          ranges[ranges.length - 1] = {start: lower.start, end: upper_bound}
-        } else {
-          ranges.push(higher);
-        }
-      }
+  // inverting ranges to free time
+  const free = [...Array((ranges.length === 0)?0:ranges.length - 1).keys()].map(index => {
+    const collapseTime = ranges[index+1].start - ranges[index].end;
+    return {
+      time: ranges[index].end,
+      endTime: ranges[index].end + collapseTime,
+      duration: collapseTime,
+      collapseWidth: 20,
     }
+  }).reduce((acc, next) => {
+    /* filter out intervals less than 15 minutes */
+    if(next.duration >= 15 * 60 * 1000) {
+      const extra = acc.reduce((total, val) => total + val.duration, 0);
+      next.left = ~~((next.time - start - extra) / scale) + 20 * acc.length;
+      acc.push(next);
+    }
+    return acc
+  }, []);
 
-    // inverting ranges to free time
-    let collapsedTime = 0;
-    let collapsedWidth = 0;
-    const free = ranges.slice(1).map((_, index) => {
-      const left = ~~((ranges[index].end - start - collapsedTime) / scale) + collapsedWidth;
-      const collapseTime = ranges[index+1].start - ranges[index].end;
-      collapsedWidth += 20;
-      collapsedTime += collapseTime;
-      return {
-        time: ranges[index].end,
-        left: left,
-        duration: collapseTime,
-        collapseWidth: 20,
-      }
-    });
-    return free
+  return free
 }
 
 class Timeline extends React.Component {
   render() {
-    console.log("RENDER")
-    console.log(this.props.start)
-    if (this.props.items.length > 0)
-      console.log(this.props.items[0].times[0].time);
-    console.log("RENDER STOP")
+    const collapse = calcCollapse(this.props.start, this.props.items, this.props.scale);
+    // console.log(collapse);
+    const min30 = 30 * 60 * 1000;
+    if (this.props.items.length > 0) {
+      // console.log(this.props.items[1].times);
+      this.props.items[1].times.push({
+        time: moment(Math.ceil(moment() / min30) * min30 + min30),
+        duration: min30 * 3, clan_a: null, clan_b: null,
+      });
+      this.props.items[1].times.sort((left, right) => left.time - right.time);
+      // console.log(this.props.items[1].times);
 
-    const ranges = calcCollapse(this.props.start, this.props.items, this.props.scale);
-    return <div style={{height: 27 + 51 * this.props.items.length}}>
+    }
+    return <div style={{height: 27 + 51 * this.props.items.length, position: 'relative'}}>
       <FixedColumnSection timeline={this.props} />
-      <TimeLineSection timeline={this.props} ranges={ranges} />
+      <TimeLineSection timeline={this.props} collapse={collapse} />
     </div>
   }
 }
 
 Timeline.defaultProps = {
   start: moment(),
-  scale: 15000,
+  scale: 10000,
   roundTo: 30 * 60 * 1000, // 30 minutes in ms
   items: [],
   rowcell: DefaultRowCell,
