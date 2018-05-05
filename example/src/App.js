@@ -33,10 +33,68 @@ class TimeCell extends React.Component {
   }
 }
 
+const min30 = 30*60*1000;
+const hour = 3600000;
+const day = hour * 24;
+const data = [{
+  province_name: 'xx', id: 'xx',
+  times: [{
+    time: moment(Math.ceil(moment() / min30) * min30 + min30),
+    duration: min30/2, clan_a: null, clan_b: null,
+  }, {
+    time: moment(Math.ceil(moment() / min30) * min30 + min30 * 1.5),
+    duration: min30/2, clan_a: null, clan_b: null,
+  }, {
+    time: moment(Math.ceil(moment() / min30) * min30 + min30*3),
+    duration: min30*1.5, clan_a: null, clan_b: null,
+  }]
+}, {
+  province_name: 'yy', id: 'yy',
+  times: [{
+    time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8 - min30 * 0.1),
+    duration: min30 / 2, clan_a: null, clan_b: null,
+  }, {
+    time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8.5),
+    duration: min30 / 2, clan_a: null, clan_b: null,
+  }, {
+    time: moment(Math.ceil(moment() / min30) * min30 + min30 * 9),
+    duration: min30, clan_a: null, clan_b: null,
+  }, {
+    time: moment(Math.ceil(moment() / min30) * min30 + min30 * 12),
+    duration: min30, clan_a: null, clan_b: null,
+  }]
+}, {
+  province_name: 'fort', id: 'fort',
+  times: [{
+    time: moment(Math.ceil(moment() / min30) * min30 + min30*8),
+    duration: min30/2, clan_a: null, clan_b: null,
+  }, {
+    time: moment(Math.ceil(moment() / min30) * min30 + min30*8.5),
+    duration: min30/2, clan_a: null, clan_b: null,
+  }, {
+    time: moment(Math.ceil(moment() / min30) * min30 + min30*9),
+    duration: min30, clan_a: null, clan_b: null,
+  }, {
+    time: moment(Math.ceil(moment() / min30) * min30 + min30*48),
+    duration: min30, clan_a: null, clan_b: null,
+  }]
+}/* */];
+
+const headerGroup = [{
+  title: moment(~~(moment()/day) * day +  32400000).format(),
+  time: ~~(moment()/day) * day +  32400000,
+  duration: day
+}, {
+  title: moment(~~(moment()/day) * day + day + 32400000).format(),
+  time: ~~(moment()/day) * day + day+  32400000,
+  duration: day
+}];
+
+
 export default class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { items: [] }
+    this.state = { items: data, headerGroup: headerGroup }
   }
 
   componentDidMount() {
@@ -59,53 +117,9 @@ export default class App extends Component {
       }
       app.setState({items: response.provinces});
     }); */
-    const min30 = 30*60*1000;
-    const data = [{
-      province_name: 'xx', id: 'xx',
-      times: [{
-        time: moment(Math.ceil(moment() / min30) * min30 + min30),
-        duration: min30/2, clan_a: null, clan_b: null,
-      }, /*{
-        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 2),
-        duration: min30/2, clan_a: null, clan_b: null,
-      },*/ {
-        time: moment(Math.ceil(moment() / min30) * min30 + min30*3),
-        duration: min30, clan_a: null, clan_b: null,
-      }]
-    }, {
-      province_name: 'yy', id: 'yy',
-      times: [{
-        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8 - min30 * 0.1),
-        duration: min30 / 2, clan_a: null, clan_b: null,
-      }, {
-        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8.5),
-        duration: min30 / 2, clan_a: null, clan_b: null,
-      }, {
-        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 9),
-        duration: min30, clan_a: null, clan_b: null,
-      }, {
-        time: moment(Math.ceil(moment() / min30) * min30 + min30 * 12),
-        duration: min30, clan_a: null, clan_b: null,
-      }]
-    }, {
-      province_name: 'fort', id: 'fort',
-      times: [{
-        time: moment(Math.ceil(moment() / min30) * min30 + min30*8),
-        duration: min30/2, clan_a: null, clan_b: null,
-      }, {
-        time: moment(Math.ceil(moment() / min30) * min30 + min30*8.5),
-        duration: min30/2, clan_a: null, clan_b: null,
-      }, {
-        time: moment(Math.ceil(moment() / min30) * min30 + min30*9),
-        duration: min30, clan_a: null, clan_b: null,
-      }, {
-        time: moment(Math.ceil(moment() / min30) * min30 + min30*48),
-        duration: min30, clan_a: null, clan_b: null,
-      }]
-    }];
     // console.log(JSON.stringify(data, null, '  '));
     // console.log(data);
-    app.setState({items: data})
+    // app.setState({items: data})
   }
 
   render () {
@@ -114,12 +128,13 @@ export default class App extends Component {
       <div>
         <p>TEST</p>
 
-        <div style={{width: 1400, margin: 20}}>
+        <div style={{width: 6400, margin: 20}}>
         <Timeline
           start={moment(Math.ceil(moment() / min30) * min30)}
           rowcell={RowCell}
           timecell={TimeCell}
           items={this.state.items}
+          headerGroup={this.state.headerGroup}
         />
       </div>
     </div>)

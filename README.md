@@ -1,6 +1,6 @@
 # react-timeline
 
-> 
+>
 
 [![NPM](https://img.shields.io/npm/v/react-timeline.svg)](https://www.npmjs.com/package/react-timeline) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -25,6 +25,11 @@ class Example extends Component {
   }
 }
 ```
+
+## Alternative calendars
+
+https://www.npmjs.com/package/react-calendar-timeline
+
 
 ## License
 
