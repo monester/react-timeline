@@ -4,6 +4,18 @@ import FixedColumnSection from './fixed-column'
 import {DefaultTimeCell, DefaultRowCell} from './content'
 import moment from 'moment'
 
+class TimeLineSectionHeaderGroupRow extends React.Component {
+  render() {
+    const item = this.props.item;
+    const width = this.props.width;
+    const sideSize = this.props.sideSize;
+
+    return <div key={item.left} className={style.timeWrap} style={{left: item.left + 1, width: width - 1, height: sideSize}}>
+      <div style={{height: sideSize, width: sideSize}}>{moment(item.time).format('HH:mm')} - {moment(item.time + item.duration).format('HH:mm')}</div>
+    </div>
+  }
+}
+
 class TimeLineSectionHeaderRow extends React.Component {
   render() {
     const start = this.props.timeline.start;
@@ -19,7 +31,6 @@ class TimeLineSectionHeaderRow extends React.Component {
     });
     calcSizePos(start, header_items, collapse, scale);
 
-    // const headerGroup = [{title: 'today', time: moment() / 86400000, duration: 86400*1000}];
     const h2 = headerGroup.filter(item => item.width > 0).map(item => {
       const cellStyle = {
         left: item.left,
@@ -42,11 +53,10 @@ class TimeLineSectionHeaderRow extends React.Component {
   }
 }
 
-
 class TimeLineSectionRow extends React.Component {
   render() {
     const item_times = this.props.times;
-    const Cell = this.props.timeline.timecell;
+    const Cell = this.props.timeline.timeCell;
     const elements = item_times.filter(time => time.width > 0).map(data => {
       const time = data.time;
       const cellStyle = {
@@ -56,7 +66,7 @@ class TimeLineSectionRow extends React.Component {
       };
       return <div key={time} className={style.cell} style={cellStyle}><Cell data={data}/></div>
     });
-    return <div className={style.row}>{elements}</div>
+    return <div className={style.timelineRow}>{elements}</div>
   }
 }
 
@@ -81,20 +91,11 @@ class TimeLineSection extends React.Component {
     });
 
     // collapse blocks with title
-    const side_size = items.length * 50 + 25 + 3;
-    const wraps = collapse.map(item => {
-      const width = item.collapseWidth;
+    const wraps = collapse.map(item =>
+      <TimeLineSectionHeaderGroupRow item={item} width={item.collapseWidth} sideSize={items.length * 51 + 25} />
+    );
 
-      return <div key={item.left} className={style.timeWrap} style={{left: item.left + 1, width: width - 1, height: side_size}}>
-        <div style={{height: side_size, width: side_size}}>{moment(item.time).format('HH:mm')} - {moment(item.time + item.duration).format('HH:mm')}</div>
-      </div>
-    });
-
-    return <div className={style.timeline} style={{backgroundSize: ~~(15*60*1000/scale)}}>
-      {header}
-      {rows}
-      {wraps}
-    </div>
+    return <div className={style.timeline} style={{backgroundSize: ~~(15*60*1000/scale)}}>{header}{rows}{wraps}</div>
   }
 }
 
@@ -200,7 +201,7 @@ class Timeline extends React.Component {
   render() {
     const collapse = calcCollapse(this.props.start, this.props.items, this.props.scale);
 
-    return <div style={{height: 27 + 51 * this.props.items.length, position: 'relative'}}>
+    return <div style={{height: 52 + 51 * this.props.items.length, position: 'relative'}}>
       <FixedColumnSection timeline={this.props} />
       <TimeLineSection timeline={this.props} collapse={collapse} />
     </div>
@@ -212,8 +213,8 @@ Timeline.defaultProps = {
   scale: 10000,
   roundTo: 30 * 60 * 1000, // 30 minutes in ms
   items: [],
-  rowcell: DefaultRowCell,
-  timecell: DefaultTimeCell,
+  rowCell: DefaultRowCell,
+  timeCell: DefaultTimeCell,
   headerGroup: [],
 };
 

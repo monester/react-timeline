@@ -3,7 +3,7 @@ import style from './timeline.module.css'
 
 class FixedColumnSection extends React.Component {
   render() {
-    const Cell = this.props.timeline.rowcell;
+    const Cell = this.props.timeline.rowCell;
     const items = this.props.timeline.items;
 
     const rows = items.map(item =>

@@ -66,6 +66,21 @@
     left: 0;
 }
 
+.timelineRow {
+  height: 50px;
+  position: relative;
+  border-top: 1px #000 solid;
+}
+
+.timelineRow:nth-child(even) {
+  background: rgba(204, 204,204, 0.8);
+}
+
+.timelineRow:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+
 .timeline {
     position: absolute;
     left: 200px;
