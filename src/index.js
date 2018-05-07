@@ -11,7 +11,7 @@ class TimeLineSectionHeaderGroupRow extends React.Component {
     const sideSize = this.props.sideSize;
 
     return <div key={item.left} className={style.timeWrap} style={{left: item.left + 1, width: width - 1, height: sideSize}}>
-      <div style={{height: sideSize, width: sideSize}}>{moment(item.time).format('HH:mm')} - {moment(item.time + item.duration).format('HH:mm')}</div>
+      <div style={{height: sideSize, width: sideSize}}>{moment.duration(item.duration).humanize()}</div>
     </div>
   }
 }
@@ -41,6 +41,7 @@ class TimeLineSectionHeaderRow extends React.Component {
       };
       return <div key={item.title} className={style.headerCell} style={cellStyle}>{item.title}</div>
     });
+
     const header = header_items.filter(time => time.width > 0).map(time => {
       const cellStyle = {
         left: time.left,
@@ -49,6 +50,7 @@ class TimeLineSectionHeaderRow extends React.Component {
       };
       return <div key={time.left} className={style.headerCell} style={cellStyle}>{moment(time.time).format('HH:mm')}</div>
     });
+
     return <div className={style.headerRow}>{h2}{header}</div>
   }
 }
@@ -92,7 +94,7 @@ class TimeLineSection extends React.Component {
 
     // collapse blocks with title
     const wraps = collapse.map(item =>
-      <TimeLineSectionHeaderGroupRow item={item} width={item.collapseWidth} sideSize={items.length * 51 + 25} />
+      <TimeLineSectionHeaderGroupRow key={item.time} item={item} width={item.collapseWidth} sideSize={items.length * 51 + 25} />
     );
 
     return <div className={style.timeline} style={{backgroundSize: ~~(15*60*1000/scale)}}>{header}{rows}{wraps}</div>

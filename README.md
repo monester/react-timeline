@@ -2,12 +2,12 @@
 
 >
 
-[![NPM](https://img.shields.io/npm/v/react-timeline.svg)](https://www.npmjs.com/package/react-timeline) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![NPM](https://img.shields.io/npm/v/@monester/react-timeline.svg)](https://www.npmjs.com/package/@monester/react-timeline) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 ## Install
 
 ```bash
-npm install --save react-timeline
+npm install --save @monester@react-timeline
 ```
 
 ## Usage
@@ -15,12 +15,12 @@ npm install --save react-timeline
 ```jsx
 import React, { Component } from 'react'
 
-import MyComponent from 'react-timeline'
+import Timeline from '@monester@react-timeline'
 
 class Example extends Component {
   render () {
     return (
-      <MyComponent />
+      <Timeline />
     )
   }
 }
