@@ -10,7 +10,7 @@ class FixedColumnSection extends React.Component {
       <div key={item.id} className={style.row}><Cell data={item}/></div>
     );
     return <div className={style.fixedColumn}>
-      <div className={style.headerRow} />
+      <div className={style.row} />
       {rows}
     </div>
   }

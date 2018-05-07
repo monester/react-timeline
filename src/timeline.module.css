@@ -1,63 +1,70 @@
+* {
+    box-sizing: border-box;
+    font-family: Verdana, Geneva, sans-serif;
+}
+
 .timeWrap {
-  background: linear-gradient(45deg, white, white 25%, #F0F5FF 25%, #F0F5FF 50%, white 50%, white 75%, #F0F5FF 75%, #F0F5FF) repeat;
-  /*background-color: red;*/
-  background-size: 16px 16px;
-  position: absolute;
-  left: 0;
-  top: 26px;
+    background: linear-gradient(45deg, white, white 25%, #F0F5FF 25%, #F0F5FF 50%, white 50%, white 75%, #F0F5FF 75%, #F0F5FF) repeat;
+    background-size: 16px 16px;
+    position: absolute;
+    left: 0;
+    top: 25px;
+    width: 20px;
+    z-index: 1;
 }
 
 .timeWrap div {
-  font-family: Verdana, Geneva, sans-serif;
-  font-size: 9pt;
-  color: darkgrey;
-  transform: rotate(-90deg);
-  text-align: center;
+    font-size: 9pt;
+    color: darkgrey;
+    transform: rotate(-90deg);
+    text-align: center;
 }
 
-.cell {
+.baseCell {
     position: absolute;
     display: block;
-    border-left: 1px #000 solid;
-    border-right: 1px #000 solid;
-    margin-left: 0;
+    border: 1px #000 solid;
+    margin: -1px 0 -1px;
     overflow: hidden;
     background-color: red;
 }
 
-.row {
-    height: 50px;
-    position: relative;
-    border-top: 1px #000 solid;
-}
-
-.headerCell {
-    position: absolute;
-    display: block;
-    border-left: 1px #000 solid;
-    border-right: 1px #000 solid;
-    margin-left: 0;
-    overflow: hidden;
-    top: 25px;
+.headerGroupCell {
+    composes: baseCell;
+    top: 0;
     height: 25px;
 }
 
-.headerRow {
-    position: relative;
-    border-top: 1px #000 solid;
-    height: 50px;
+.headerCell {
+    composes: baseCell;
+    top: 25px;
+    height: 26px;
 }
 
-.row:last-child {
-    border-bottom: 1px #000 solid;
+.cell {
+    composes: baseCell;
+    height: 51px;
+}
+
+.row {
+    height: 51px;
+    position: relative;
+    border-width: 1px 0 1px; /* #000 solid;*/
+    border-color: black;
+    border-style: solid;
+    margin-bottom: -1px;
 }
 
 .row:nth-child(even) {
-    background: rgba(204, 204,204, 0.8);
+    background: rgba(204, 204, 204, 0.8);
 }
 
 .row:nth-child(odd) {
     background: rgba(255, 255, 255, 0.8);
+}
+
+.row:last-of-type {
+    margin-bottom: 0;
 }
 
 .fixedColumn {
@@ -66,27 +73,12 @@
     left: 0;
 }
 
-.timelineRow {
-  height: 50px;
-  position: relative;
-  border-top: 1px #000 solid;
-}
-
-.timelineRow:nth-child(even) {
-  background: rgba(204, 204,204, 0.8);
-}
-
-.timelineRow:nth-child(odd) {
-  background: rgba(255, 255, 255, 0.8);
-}
-
-
 .timeline {
     position: absolute;
     left: 200px;
     overflow: hidden;
     width: calc(100% - 200px);
-    border-bottom: 1px #000 solid;
+    /*border-bottom: 0; /*px #000 solid;
     /*background: linear-gradient(90deg, black, black 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0));*/
     /*background-position: 10px;*/
 }
