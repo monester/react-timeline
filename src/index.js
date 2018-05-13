@@ -43,12 +43,13 @@ class TimeLineSectionHeaderRow extends React.Component {
         style={{left: time.left, width: time.width + 1}}>{moment(time.time).format('HH:mm')}</div>
     )
 
-    return <div className={style.row}>{h2}{header}</div>
+    return <div className={style.row} style={{height: 51}}>{h2}{header}</div>
   }
 }
 
 class TimeLineSectionRow extends React.Component {
   render () {
+    const height = this.props.timeline.rowHeight;
     const itemTimes = this.props.times
     const Cell = this.props.timeline.timeCell
     const elements = itemTimes.filter(time => time.width > 0).map(data =>
@@ -56,18 +57,15 @@ class TimeLineSectionRow extends React.Component {
         key={data.time} className={style.cell}
         style={{left: data.left, width: data.width + 1}}><Cell data={data} /></div>
     )
-    return <div className={style.row}>{elements}</div>
+    return <div className={style.row} style={{height: height}}>{elements}</div>
   }
-}
-
-TimeLineSectionRow.defaultProps = {
-  height: 50
 }
 
 class TimeLineSection extends React.Component {
   render () {
     const start = this.props.timeline.start
     const items = this.props.timeline.items
+    const height = this.props.timeline.rowHeight - 1
     const collapse = this.props.collapse
     const scale = this.props.timeline.scale
 
@@ -84,7 +82,7 @@ class TimeLineSection extends React.Component {
     const wraps = collapse.map(item =>
       <TimeLineSectionHeaderGroupRow
         key={item.time} item={item} width={item.collapseWidth}
-        sideSize={items.length * 50 + 25} />
+        sideSize={items.length * height + 25} />
     )
 
     return <div className={style.timeline}>{wraps}{header}{rows}</div>
@@ -191,7 +189,9 @@ function calcCollapse (start, items, scale) {
 class Timeline extends React.Component {
   render () {
     const collapse = calcCollapse(this.props.start, this.props.items, this.props.scale)
-    return <div style={{height: 52 + 51 * this.props.items.length, position: 'relative'}}>
+    const itemsCount = this.props.items.length
+    const rowHeight = this.props.rowHeight
+    return <div style={{height: 52 + rowHeight * itemsCount, position: 'relative'}}>
       <FixedColumnSection timeline={this.props} />
       <TimeLineSection timeline={this.props} collapse={collapse} />
     </div>
@@ -204,6 +204,7 @@ Timeline.defaultProps = {
   roundTo: 30 * 60 * 1000, // 30 minutes in ms
   items: [],
   rowCell: DefaultRowCell,
+  rowHeight: 51,
   timeCell: DefaultTimeCell,
   headerGroup: []
 }
