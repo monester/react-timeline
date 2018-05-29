@@ -66,6 +66,7 @@ class TimeLineSection extends React.Component {
     const start = this.props.timeline.start
     const items = this.props.timeline.items
     const height = this.props.timeline.rowHeight - 1
+    const fixedWidth = this.props.timeline.fixedWidth
     const collapse = this.props.collapse
     const scale = this.props.timeline.scale
 
@@ -85,7 +86,15 @@ class TimeLineSection extends React.Component {
         sideSize={items.length * height + 25} />
     )
 
-    return <div className={style.timeline}>{wraps}{header}{rows}</div>
+    const extraStyle = {
+      width: `calc(100% - ${fixedWidth}px)`,
+      left: fixedWidth,
+    }
+
+    return <div className={style.timeline} style={extraStyle}>
+      {wraps}
+      <div>{header}{rows}</div>
+    </div>
   }
 }
 
@@ -205,6 +214,7 @@ Timeline.defaultProps = {
   items: [],
   rowCell: DefaultRowCell,
   rowHeight: 51,
+  fixedWidth: 300,
   timeCell: DefaultTimeCell,
   headerGroup: []
 }
