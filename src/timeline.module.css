@@ -39,6 +39,7 @@
     composes: baseCell;
     top: 25px;
     height: 26px;
+    background: linear-gradient(white, lightgray 100%);
 }
 
 .cell {

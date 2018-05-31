@@ -49,13 +49,13 @@ class TimeLineSectionHeaderRow extends React.Component {
 
 class TimeLineSectionRow extends React.Component {
   render () {
-    const height = this.props.timeline.rowHeight;
-    const itemTimes = this.props.times
+    const height = this.props.timeline.rowHeight
+    const item = this.props.item
     const Cell = this.props.timeline.timeCell
-    const elements = itemTimes.filter(time => time.width > 0).map(data =>
+    const elements = item.times.filter(time => time.width > 0).map(data =>
       <div
         key={data.time} className={style.cell}
-        style={{left: data.left, width: data.width + 1}}><Cell data={data} /></div>
+        style={{left: data.left, width: data.width + 1}}><Cell item={item} data={data} /></div>
     )
     return <div className={style.row} style={{height: height}}>{elements}</div>
   }
@@ -74,9 +74,9 @@ class TimeLineSection extends React.Component {
     const header = <TimeLineSectionHeaderRow height={25} timeline={this.props.timeline} collapse={collapse} />
 
     // add rows with elements
-    const rows = items.map(data => {
-      const times = calcSizePos(start, data.times, collapse, scale)
-      return <TimeLineSectionRow key={data.id} timeline={this.props.timeline} times={times} />
+    const rows = items.map(item => {
+      const times = calcSizePos(start, item.times, collapse, scale)
+      return <TimeLineSectionRow key={item.id} timeline={this.props.timeline} times={times} />
     })
 
     // collapse blocks with title
