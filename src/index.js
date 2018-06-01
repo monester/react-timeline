@@ -9,8 +9,8 @@ class TimeLineSectionHeaderGroupRow extends React.Component {
     const item = this.props.item
     const sideSize = this.props.sideSize
 
-    return <div key={item.left} className={style.timeWrap} style={{left: item.left, height: sideSize}}>
-      <div style={{height: sideSize, width: sideSize}}>{moment.duration(item.duration).humanize()}</div>
+    return <div key={item.left} className={style.timeWrap} style={{left: item.left + 20, width: sideSize}}>
+      <div style={{height: 20, width: sideSize}}>{moment.duration(item.duration).humanize()}</div>
     </div>
   }
 }
@@ -76,7 +76,7 @@ class TimeLineSection extends React.Component {
     // add rows with elements
     const rows = items.map(item => {
       const times = calcSizePos(start, item.times, collapse, scale)
-      return <TimeLineSectionRow key={item.id} timeline={this.props.timeline} times={times} />
+      return <TimeLineSectionRow key={item.id} timeline={this.props.timeline} item={item} times={times}/>
     })
 
     // collapse blocks with title
